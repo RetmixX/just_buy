@@ -1,100 +1,57 @@
-mod utils;
-mod models;
-mod repository;
-mod schema;
+mod shared;
+mod user;
+mod product;
+mod cart;
 
 use std::env;
-use actix_web::{App, delete, get, HttpResponse, HttpServer, patch, post, Responder, web};
-use actix_web::web::{Data, Path};
+use actix_cors::Cors;
+use actix_web::{App, HttpServer};
+use actix_web::http::header;
+use actix_web::web::Data;
 use dotenv::dotenv;
-use sqlx::{PgPool, Postgres};
-use crate::models::models_data::{NewProduct, Product, UpdateProduct};
-use crate::repository::database::{Database, DbError};
+use sqlx::{Postgres};
+use crate::cart::service::CartService;
+use crate::product::service::ProductService;
+use crate::shared::db::get_connection;
+use crate::shared::service::token_service::TokenService;
+use crate::shared::utils::config_json_validation::config_json_validation;
+use crate::shared::utils::register_routers::config;
+use crate::user::service::user_service::UserService;
+
 
 type DBPool = sqlx::Pool<Postgres>;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
-
-    let db_url = env::var("DATABASE_URL").expect("DB URL NOT SET");
-
-    let pool = PgPool::connect(&db_url).await
-        .expect("Cannot create connect to DB");
     env::set_var("RUST_LOG", "debug");
     env_logger::init();
+    let db_pool = get_connection().await.clone().unwrap();
+    let product_service = ProductService::new(db_pool.clone());
+    let user_service = UserService::new(db_pool.clone());
+    let data_products = Data::new(product_service);
+    let data_users = Data::new(user_service);
+    let data_cart = Data::new(CartService::new(db_pool.clone()));
+    let token_data = Data::new(TokenService::new(db_pool.clone()));
 
-    let db = Database::new();
-    let data = web::Data::new(db);
+    let json_config = config_json_validation();
+
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_methods(vec!["GET", "POST", "PATCH", "DELETE"])
+            .allowed_headers(vec![header::CONTENT_TYPE, header::AUTHORIZATION, header::ACCEPT])
+            .supports_credentials();
+
         App::new()
-            .app_data(data.clone())
+            .app_data(token_data.clone())
+            .app_data(data_products.clone())
+            .app_data(data_users.clone())
+            .app_data(data_cart.clone())
+            .app_data(json_config.clone())
             .configure(config)
             .wrap(actix_web::middleware::Logger::default())
+            .wrap(cors)
     }).bind(("127.0.0.1", 8080))?
         .run()
         .await
-}
-
-#[get("/products")]
-async fn index_products(db: web::Data<Database>) -> impl Responder {
-    match db.find_all_products() {
-        Ok(products) => HttpResponse::Ok().json(products),
-        Err(_) => HttpResponse::InternalServerError().body("Server Error")
-    }
-}
-
-#[get("/products/{id_product}")]
-async fn show_product(db: web::Data<Database>, product_id: web::Path<i32>) -> impl Responder {
-    match db.find_by_id_product(&product_id) {
-        None => HttpResponse::NotFound().body(format!("Product by id - {} not found", product_id)),
-        Some(product) => HttpResponse::Ok().json(product)
-    }
-}
-
-#[post("/products")]
-async fn create_product(db: web::Data<Database>, new_product: web::Json<NewProduct>)
-                        -> impl Responder {
-    match db.create_product(new_product.into_inner()) {
-        Ok(product) => HttpResponse::Created().json(product),
-        Err(_) => HttpResponse::InternalServerError().body("Server Error")
-    }
-}
-
-#[patch("/products/{id_product}")]
-async fn update_product(db: web::Data<Database>, update_product: web::Json<UpdateProduct>,
-                        id_product: web::Path<i32>) -> impl Responder {
-    match db.update_product(&id_product, update_product.into_inner()) {
-        None => HttpResponse::NotFound()
-            .body(format!("Product by id - {}, not found", id_product)),
-
-        Some(product) => HttpResponse::Ok().json(product)
-    }
-}
-
-#[delete("/products/{id_product}")]
-async fn delete_product(db: web::Data<Database>, id_product: web::Path<i32>) -> impl Responder {
-    match db.delete_product(&id_product) {
-        None => HttpResponse::NotFound().body(format!("Product by id - {} not found", &id_product)),
-        Some(product) => HttpResponse::Ok().body(format!("Product by id - {} deleted", product))
-    }
-}
-
-#[get("/test")]
-async fn get_test(db: Data<Database>) -> impl Responder{
-    db.get_cart_with_products(1);
-
-    HttpResponse::Ok()
-}
-
-pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(
-        web::scope("/api")
-            .service(index_products)
-            .service(create_product)
-            .service(show_product)
-            .service(delete_product)
-            .service(update_product)
-            .service(get_test)
-    );
 }

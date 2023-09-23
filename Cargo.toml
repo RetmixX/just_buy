@@ -7,8 +7,24 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.4.0"
+actix-web-validator = "5.0.1"
 dotenv = "0.15.0"
 env_logger = "0.10.0"
 serde = { version = "1.0.188", features = ["derive"] }
 serde_json = "1.0.107"
-sqlx = { version = "0.7.1", features = ["runtime-async-std-native-tls", "postgres"] }
+validator = { version = "0.16", features = ["derive"] }
+sqlx = { version = "0.7.1", features = ["runtime-tokio-native-tls", "postgres"] }
+mime = "0.3.17"
+feature = "0.5.1"
+tokio = { version = "1.32.0", features = ["full"] }
+jsonwebtoken = "8.3.0"
+argon2 = "0.5.2"
+rand_core = { version = "0.6.4", features = ["std"] }
+chrono = { version = "0.4.31", features = ["serde"] }
+actix-cors = "0.6.4"
+lazy_static = "1.4.0"
+async_once = "0.2.6"
+thiserror = "1.0.48"
+actix-web-grants = "3.0.2"
+actix-web-httpauth = "0.8.1"
+pwhash = "1.0.0"
