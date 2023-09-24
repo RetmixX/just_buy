@@ -8,18 +8,83 @@ use crate::shared::responses::MessageResponse;
 use crate::shared::service::token_data::JwtMiddleware;
 use crate::shared::utils::grant_validator::check_role;
 
+#[utoipa::path(
+    get,
+    path = "/api/products",
+    tag = "Эндпоинт для просмотра списка товаров",
+    responses(
+        (
+            status = 200,
+            description = "Позволяет всем пользователям посмотреть все товары из бд",
+            body = ProductDto
+        ),
+        (
+            status = 500,
+            body = ApiErrorResponse
+        )
+    )
+)]
 #[get("/products")]
 pub async fn index_product(service: Data<ProductService>) -> Result<impl Responder, ApiError> {
     let response = HttpResponse::Ok().json(service.find_all_products().await?);
     Ok(response)
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/products/{id}",
+    tag = "Эндпоинт для просмотра товара",
+    responses(
+        (
+            status = 200, description = "Позволяет всем пользователям посмотреть товар по ид",
+            body = ProductDto
+        ),
+        (
+            status = 404,
+            description = "Ошибка возникает, когда товара с таким ид нету",
+            body = ApiErrorResponse
+        ),
+        (
+            status = 500,
+            body = ApiErrorResponse
+        )
+    )
+)]
 #[get("/products/{id}")]
 pub async fn get_product(service: Data<ProductService>, id: Path<i32>) -> Result<impl Responder, ApiError> {
     let response = HttpResponse::Ok().json(service.find_product(&id).await?);
     Ok(response)
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/products",
+    tag = "Эндпоинт для создание товара",
+    responses(
+        (
+            status = 200,
+            description = "Позволяет администраторам создать товар",
+            body = ProductDto
+        ),
+        (
+            status = 401,
+            description = "Ошибка если нету токена/не валидный или пользователь не админ",
+            body = ApiErrorResponse
+        ),
+        (
+            status = 422,
+            description = "Поля были заполнены не верно",
+            body = JsonErrorPayload
+        ),
+        (
+        status = 500,
+        body = ApiErrorResponse
+        ),
+    ),
+    security(
+        ("token" = [])
+    )
+)]
 #[post("/products")]
 pub async fn create_product(service: Data<ProductService>,
                             data: Json<UpsertProductDto>, payload: JwtMiddleware)
@@ -29,6 +94,36 @@ pub async fn create_product(service: Data<ProductService>,
     Ok(HttpResponse::Created().json(result))
 }
 
+#[utoipa::path(
+    patch,
+    path = "/api/products/{id}",
+    tag = "Эндпоинт для обновления товара",
+    responses(
+        (
+            status = 200,
+            description = "Позволяет администратору обновить товар по ид",
+            body = ProductDto
+        ),
+        (
+            status = 401,
+            description = "Ошибка если нету токена/не валидный или пользователь не админ",
+            body = ApiErrorResponse
+        ),
+        (
+            status = 422,
+            description = "Поля были заполнены не верно",
+            body = JsonErrorPayload
+        ),
+        (
+            status = 500,
+            body = ApiErrorResponse
+        )
+    ),
+    security(
+        ("token" = [])
+    )
+
+)]
 #[patch("/products/{id}")]
 pub async fn update_product(service: Data<ProductService>, id: Path<i32>,
                             data: Json<UpsertProductDto>, payload: JwtMiddleware)
@@ -38,6 +133,35 @@ pub async fn update_product(service: Data<ProductService>, id: Path<i32>,
     Ok(HttpResponse::Ok().json(result))
 }
 
+#[utoipa::path(
+    delete,
+    path = "/api/products/{id}",
+    tag = "Эндпоинт для удаления товара",
+    responses(
+    (
+        status = 200,
+        description = "Позволяет администратору удалять товар по ид",
+        body = ProductDto
+    ),
+    (
+        status = 401,
+        description = "Ошибка если нету токена/не валидный или пользователь не админ",
+        body = ApiErrorResponse
+    ),
+    (
+        status = 422,
+        description = "Поля были заполнены не верно",
+        body = JsonErrorPayload
+    ),
+    (
+        status = 500,
+        body = ApiErrorResponse
+    )
+    ),
+    security(
+        ("token" = [])
+    )
+)]
 #[delete("/products/{id}")]
 pub async fn delete_product(service: Data<ProductService>, id: Path<i32>,
                             payload: JwtMiddleware) -> Result<impl Responder, ApiError> {

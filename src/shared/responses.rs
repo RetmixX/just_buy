@@ -1,7 +1,8 @@
 use chrono::{DateTime, Local};
 use serde::Serialize;
+use utoipa::ToSchema;
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct MessageResponse {
     message: String,
     date_time: DateTime<Local>,

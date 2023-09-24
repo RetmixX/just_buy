@@ -6,6 +6,7 @@ use actix_web::body::BoxBody;
 use chrono::{DateTime, Local};
 use serde::Serialize;
 use sqlx::{Error as SqlxError, Error};
+use utoipa::ToSchema;
 use validator::ValidationError;
 
 #[derive(Debug)]
@@ -24,7 +25,7 @@ pub struct ApiError {
     pub type_error: ErrorType,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct ApiErrorResponse {
     pub message: String,
     pub info: String,

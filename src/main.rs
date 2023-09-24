@@ -11,12 +11,15 @@ use actix_web::http::header;
 use actix_web::web::Data;
 use dotenv::dotenv;
 use sqlx::{Postgres};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 use crate::cart::service::CartService;
 use crate::order::service::OrderService;
 use crate::product::service::ProductService;
 use crate::shared::db::get_connection;
 use crate::shared::service::token_service::TokenService;
 use crate::shared::utils::config_json_validation::config_json_validation;
+use crate::shared::utils::documentation::SwaggerDoc;
 use crate::shared::utils::register_routers::config;
 use crate::user::service::user_service::UserService;
 
@@ -37,6 +40,7 @@ async fn main() -> std::io::Result<()> {
         = load_app_data(db_pool.clone());
 
     let json_config = config_json_validation();
+    let swagger = SwaggerDoc::openapi();
 
     HttpServer::new(move || {
         let cors = Cors::default()
@@ -52,6 +56,10 @@ async fn main() -> std::io::Result<()> {
             .app_data(order_data.clone())
             .app_data(json_config.clone())
             .configure(config)
+            .service(
+                SwaggerUi::new("/swagger-ui/{_:.*}")
+                    .url("/api-docs/openapi.json", swagger.clone())
+            )
             .wrap(actix_web::middleware::Logger::default())
             .wrap(cors)
     }).bind(("127.0.0.1", 8080))?
