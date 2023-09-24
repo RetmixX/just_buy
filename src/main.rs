@@ -29,13 +29,12 @@ async fn main() -> std::io::Result<()> {
     env::set_var("RUST_LOG", "debug");
     env_logger::init();
     let db_pool = get_connection().await.clone().unwrap();
-    let product_service = ProductService::new(db_pool.clone());
-    let user_service = UserService::new(db_pool.clone());
-    let data_products = Data::new(product_service);
-    let data_users = Data::new(user_service);
-    let data_cart = Data::new(CartService::new(db_pool.clone()));
-    let token_data = Data::new(TokenService::new(db_pool.clone()));
-    let order_data = Data::new(OrderService::new(db_pool.clone()));
+    let (data_products,
+        data_users,
+        data_cart,
+        token_data,
+        order_data)
+        = load_app_data(db_pool.clone());
 
     let json_config = config_json_validation();
 
@@ -58,4 +57,16 @@ async fn main() -> std::io::Result<()> {
     }).bind(("127.0.0.1", 8080))?
         .run()
         .await
+}
+
+fn load_app_data(connection: DBPool)
+    -> (Data<ProductService>, Data<UserService>,
+        Data<CartService>, Data<TokenService>, Data<OrderService>) {
+    let data_products = Data::new(ProductService::new(connection.clone()));
+    let data_users = Data::new(UserService::new(connection.clone()));
+    let data_cart = Data::new(CartService::new(connection.clone()));
+    let token_data = Data::new(TokenService::new(connection.clone()));
+    let order_data = Data::new(OrderService::new(connection.clone()));
+
+    (data_products, data_users, data_cart, token_data, order_data)
 }
