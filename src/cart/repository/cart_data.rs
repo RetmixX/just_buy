@@ -19,7 +19,7 @@ impl CartData {
                                 name, description, price from carts
                                 join carts_products on carts.id = carts_products.cart_id
                                 join products on carts_products.product_id
-                                 = products.id where user_id = $1"#;
+                                 = products.id where user_id = $1 and ordered = false"#;
 
         let data = sqlx::query_as::<_, CartUser>(query)
             .bind(id_user).fetch_all(&self.db).await?;

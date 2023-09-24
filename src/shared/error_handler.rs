@@ -14,7 +14,7 @@ pub enum ErrorType {
     NotFound,
     Forbidden,
     Unauthorized,
-    ValidationUnique,
+    Validation,
     Grand,
 }
 
@@ -32,7 +32,7 @@ pub struct ApiErrorResponse {
 }
 
 impl Display for ApiError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }
@@ -53,7 +53,7 @@ impl ResponseError for ApiError {
             ErrorType::NotFound => StatusCode::NOT_FOUND,
             ErrorType::Unauthorized => StatusCode::UNAUTHORIZED,
             ErrorType::Forbidden => StatusCode::FORBIDDEN,
-            ErrorType::ValidationUnique => StatusCode::UNPROCESSABLE_ENTITY,
+            ErrorType::Validation => StatusCode::UNPROCESSABLE_ENTITY,
             ErrorType::Grand => StatusCode::FORBIDDEN
         }
     }
@@ -87,7 +87,7 @@ impl From<ValidationError> for ApiError {
     fn from(value: ValidationError) -> Self {
         Self {
             message: value.code.to_string(),
-            type_error: ErrorType::ValidationUnique,
+            type_error: ErrorType::Validation,
         }
     }
 }

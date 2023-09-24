@@ -2,6 +2,7 @@ mod shared;
 mod user;
 mod product;
 mod cart;
+mod order;
 
 use std::env;
 use actix_cors::Cors;
@@ -11,6 +12,7 @@ use actix_web::web::Data;
 use dotenv::dotenv;
 use sqlx::{Postgres};
 use crate::cart::service::CartService;
+use crate::order::service::OrderService;
 use crate::product::service::ProductService;
 use crate::shared::db::get_connection;
 use crate::shared::service::token_service::TokenService;
@@ -33,6 +35,7 @@ async fn main() -> std::io::Result<()> {
     let data_users = Data::new(user_service);
     let data_cart = Data::new(CartService::new(db_pool.clone()));
     let token_data = Data::new(TokenService::new(db_pool.clone()));
+    let order_data = Data::new(OrderService::new(db_pool.clone()));
 
     let json_config = config_json_validation();
 
@@ -47,6 +50,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(data_products.clone())
             .app_data(data_users.clone())
             .app_data(data_cart.clone())
+            .app_data(order_data.clone())
             .app_data(json_config.clone())
             .configure(config)
             .wrap(actix_web::middleware::Logger::default())

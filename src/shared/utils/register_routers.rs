@@ -1,5 +1,6 @@
 use actix_web::web;
 use crate::cart::controllers::{add_product_to_cart, delete_product_from_cart, show_cart};
+use crate::order::controllers::{get_user_orders, order_cart};
 use crate::product::controllers::{get_product,
                                   index_product,
                                   update_product,
@@ -22,5 +23,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
             .service(show_cart)
             .service(add_product_to_cart)
             .service(delete_product_from_cart)
+            .service(order_cart)
+            .service(get_user_orders)
     );
 }

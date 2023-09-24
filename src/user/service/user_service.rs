@@ -61,7 +61,7 @@ impl UserService {
         match self.user_data.user_by_email(email).await {
             Ok(_) => Err(ApiError {
                 message: "Wrong email".to_string(),
-                type_error: ErrorType::ValidationUnique,
+                type_error: ErrorType::Validation,
             }),
             Err(_) => Ok(())
         }
