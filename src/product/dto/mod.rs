@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use validator::Validate;
 use crate::product::repository::product_model::Product;
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct ProductDto {
     pub id: i32,
     pub name: String,
@@ -10,7 +11,7 @@ pub struct ProductDto {
     pub price: i32,
 }
 
-#[derive(Deserialize, Validate)]
+#[derive(Deserialize, Validate, ToSchema)]
 pub struct UpsertProductDto {
     #[validate(length(min = 1, max = 100, message = "Length: min:= 10, max:=100"),
     required(message = "Name is required"))]

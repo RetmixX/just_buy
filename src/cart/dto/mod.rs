@@ -1,7 +1,8 @@
 use serde::Serialize;
+use utoipa::ToSchema;
 use crate::cart::repository::cart_model::CartUser;
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct CartUserDto {
     pub id: i32,
     pub product_id: i32,
