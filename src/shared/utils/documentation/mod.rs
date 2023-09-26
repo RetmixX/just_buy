@@ -29,7 +29,8 @@ use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
             crate::user::dto::UserToken,
             crate::shared::responses::MessageResponse,
             crate::shared::error_handler::ApiErrorResponse,
-            crate::shared::utils::config_json_validation::JsonErrorPayload
+            crate::shared::utils::config_json_validation::JsonErrorPayload,
+            crate::shared::utils::config_json_validation::ErrorValidationInfo
         )
     ),
     modifiers(&SecurityAddon)

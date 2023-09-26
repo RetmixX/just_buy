@@ -45,7 +45,7 @@ pub async fn registration(service: Data<UserService>, data: Json<RegisterUser>)
 }
 
 #[utoipa::path(
-    get,
+    post,
     path = "/api/login",
     tag = "Эндпоинт для авторизации пользователя",
     responses(

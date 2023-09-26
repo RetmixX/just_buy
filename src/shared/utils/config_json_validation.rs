@@ -1,17 +1,17 @@
 use actix_web::{error, HttpResponse};
 use actix_web_validator::{JsonConfig, Error};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use utoipa::ToSchema;
 use validator::ValidationErrors;
 
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, ToSchema)]
 pub struct JsonErrorPayload {
     message: String,
     fields: Vec<ErrorValidationInfo>,
 }
 
-#[derive(Serialize, Deserialize)]
-struct ErrorValidationInfo {
+#[derive(Serialize, ToSchema)]
+pub struct ErrorValidationInfo {
     field: String,
     info: Vec<String>,
 }
