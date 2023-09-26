@@ -62,7 +62,7 @@ pub async fn get_product(service: Data<ProductService>, id: Path<i32>) -> Result
     tag = "Эндпоинт для создание товара",
     responses(
         (
-            status = 200,
+            status = 201,
             description = "Позволяет администраторам создать товар",
             body = ProductDto
         ),

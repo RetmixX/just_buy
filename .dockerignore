@@ -1,0 +1,5 @@
+Cargo.lock
+docker-compose.yaml
+target
+.env
+collection

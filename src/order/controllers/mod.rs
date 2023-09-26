@@ -37,7 +37,7 @@ pub async fn get_user_orders(service: Data<OrderService>, payload: JwtMiddleware
     tag = "Эндпоинт для оформления заказа",
     responses(
         (
-        status = 200,
+        status = 201,
         description = "Оформление заказа для текущей корзниы пользователя",
         body = MessageResponse
         ),
