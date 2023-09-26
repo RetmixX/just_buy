@@ -15,5 +15,5 @@
 - api/signup
 - api/logout
 - api/order
-- /api/carts
+- api/carts
 - / - secret
